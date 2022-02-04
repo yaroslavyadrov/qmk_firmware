@@ -38,25 +38,25 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   KC_ESC, LALT_T(KC_GRV), KC_Q,    KC_W,    KC_E,    KC_R,      KC_T,      KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,            KC_LBRC,         KC_RBRC,
           LSFT_T(KC_TAB), KC_A,    KC_S,    KC_D,    KC_F,      KC_G,      KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN,         LAG_T(KC_QUOT),
           TD(CTL_SPACE),  KC_Z,    KC_X,    KC_C,    KC_V,      KC_B,      KC_N,    KC_M,    KC_COMM, KC_DOT,  RALT_T(KC_SLSH), RGUI_T(KC_BSLS),
-               LT(1,KC_ESC), TD(CMD_SHIFT), LT(2,KC_CAPS),      LT(1,KC_ENT), RSFT_T(KC_SPC), LT(2,KC_BSPC)
+               LT(2,KC_CAPS), LT(1,KC_ENT), TD(CMD_SHIFT),      LT(1,KC_ESC), LT(2,KC_SPC),  RSFT_T(KC_BSPC)
 ),
 [1] = LAYOUT(
   KC_TRNS, KC_CAPS, KC_PSLS, KC_7, KC_8, KC_9,  KC_MINS,        KC_AMPR,   KC_COLN,   KC_PMNS,   KC_GT,   KC_NO,   KC_NO,  RSG(KC_4),
            KC_TRNS, KC_PAST, KC_4, KC_5, KC_6,  KC_EQL,         KC_EXLM,   KC_PEQL,   KC_LPRN,   KC_RPRN, KC_QUES, KC_NO,
-           KC_TRNS, KC_0,    KC_1, KC_2, KC_3,  KC_PCMM,        KC_PIPE,   KC_UNDS,   KC_LCBR,   KC_RCBR, KC_RALT,   KC_RCMD,
-                        KC_TRNS, KC_TRNS, LT(3,KC_CAPS),        KC_TRNS,   KC_TRNS,   LT(3, KC_BSPC)
+           KC_TRNS, KC_0,    KC_1, KC_2, KC_3,  KC_PDOT,        KC_PIPE,   KC_UNDS,   KC_LCBR,   KC_RCBR, KC_RALT,   KC_RCMD,
+                        LT(3,KC_CAPS), KC_TRNS, KC_TRNS,        KC_TRNS,   LT(3, KC_BSPC),   KC_TRNS
 ),
 [2] = LAYOUT(
-  KC_TRNS, KC_CAPS,  KC_NO,   KC_F7,   KC_F8,   KC_F9,   KC_F10,      KC_KB_VOLUME_UP,   KC_ENT,        RALT(KC_ENT), KC_RGUI, KC_RSFT, KC_NO,  RSG(KC_4),
-           KC_TRNS,  KC_NO,   KC_F4,   KC_F5,   KC_F6,   KC_F11,      KC_HOME,           KC_LEFT,       KC_UP,        KC_RGHT, KC_END,  KC_NO,
+  KC_TRNS, KC_CAPS,  KC_NO,   KC_F7,   KC_F8,   KC_F9,   KC_F10,      KC_KB_VOLUME_UP,   KC_ENT,        RALT(KC_ENT), KC_RGUI, KC_RSFT, KC_WH_D,  RSG(KC_4),
+           KC_TRNS,  KC_NO,   KC_F4,   KC_F5,   KC_F6,   KC_F11,      KC_HOME,           KC_LEFT,       KC_UP,        KC_RGHT, KC_END,  KC_WH_U,
            KC_TRNS,  KC_LGUI, KC_F1,   KC_F2,   KC_F4,   KC_F12,      KC_KB_VOLUME_DOWN, TD(ALT_SHIFT), KC_DOWN,      KC_RALT, KC_RSFT, KC_RCMD,
-                                  LT(3,KC_ESC), KC_TRNS, KC_TRNS,     LT(3,KC_ENT), KC_TRNS, KC_TRNS
+                                KC_TRNS, LT(3,KC_CAPS), KC_TRNS,      LT(3,KC_ENT), KC_TRNS, KC_TRNS
 ),
 [3] = LAYOUT_symmetric(
   RESET,   DEBUG,   KC_ASUP, XXXXXXX,  XXXXXXX, XXXXXXX, XXXXXXX,
            XXXXXXX, KC_ASRP, KC_ASTG,  XXXXXXX, XXXXXXX, XXXXXXX,
-           EEP_RST, KC_ASDN, XXXXXXX, XXXXXXX, XXXXXXX,XXXXXXX,
-                                      _______, XXXXXXX,   _______
+           EEP_RST, KC_ASDN, XXXXXXX,  XXXXXXX, XXXXXXX, XXXXXXX,
+                                       _______, XXXXXXX, _______
 )
 };
 
