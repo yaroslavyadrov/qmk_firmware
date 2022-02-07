@@ -18,7 +18,9 @@ typedef struct {
 enum {
     CTL_SPACE,
     CMD_SHIFT,
-    ALT_SHIFT
+    ALT_SHIFT,
+    ALT_BACK,
+    Q_FORW
 };
 
 int cur_dance(qk_tap_dance_state_t *state);
@@ -33,12 +35,18 @@ void cmd_shift_reset(qk_tap_dance_state_t *state, void *user_data);
 void alt_shift_finished(qk_tap_dance_state_t *state, void *user_data);
 void alt_shift_reset(qk_tap_dance_state_t *state, void *user_data);
 
+void alt_back_finished(qk_tap_dance_state_t *state, void *user_data);
+void alt_back_reset(qk_tap_dance_state_t *state, void *user_data);
+
+void q_forw_finished(qk_tap_dance_state_t *state, void *user_data);
+void q_forw_reset(qk_tap_dance_state_t *state, void *user_data);
+
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 [0] = LAYOUT(
-  KC_ESC, LALT_T(KC_GRV), KC_Q,    KC_W,    KC_E,    KC_R,      KC_T,      KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,            KC_LBRC,         KC_RBRC,
-          LSFT_T(KC_TAB), KC_A,    KC_S,    KC_D,    KC_F,      KC_G,      KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN,         LAG_T(KC_QUOT),
-          TD(CTL_SPACE),  KC_Z,    KC_X,    KC_C,    KC_V,      KC_B,      KC_N,    KC_M,    KC_COMM, KC_DOT,  RALT_T(KC_SLSH), RGUI_T(KC_BSLS),
-               LT(2,KC_CAPS), LT(1,KC_ENT), TD(CMD_SHIFT),      LT(1,KC_ESC), LT(2,KC_SPC),  RSFT_T(KC_BSPC)
+  KC_ESC, TD(ALT_BACK),   TD(Q_FORW),    KC_W,    KC_E,    KC_R,      KC_T,      KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,            KC_LBRC,         KC_RBRC,
+          LSFT_T(KC_TAB), KC_A,          KC_S,    KC_D,    KC_F,      KC_G,      KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN,         LAG_T(KC_QUOT),
+          TD(CTL_SPACE),  KC_Z,          KC_X,    KC_C,    KC_V,      KC_B,      KC_N,    KC_M,    KC_COMM, KC_DOT,  RALT_T(KC_SLSH), RGUI_T(KC_BSLS),
+                     LT(2,KC_CAPS), LT(1,KC_ENT), TD(CMD_SHIFT),      LT(1,KC_ESC), LT(2,KC_SPC),  RSFT_T(KC_BSPC)
 ),
 [1] = LAYOUT(
   KC_TRNS, KC_CAPS, KC_PSLS, KC_7, KC_8, KC_9,  KC_MINS,        KC_AMPR,   KC_COLN,   KC_PMNS,   KC_GT,   KC_NO,   KC_NO,  RSG(KC_4),
@@ -50,7 +58,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   KC_TRNS, KC_CAPS,  KC_NO,   KC_F7,   KC_F8,   KC_F9,   KC_F10,      KC_KB_VOLUME_UP,   KC_ENT,        RALT(KC_ENT), KC_RGUI, KC_RSFT, KC_WH_D,  RSG(KC_4),
            KC_TRNS,  KC_NO,   KC_F4,   KC_F5,   KC_F6,   KC_F11,      KC_HOME,           KC_LEFT,       KC_UP,        KC_RGHT, KC_END,  KC_WH_U,
            KC_TRNS,  KC_LGUI, KC_F1,   KC_F2,   KC_F4,   KC_F12,      KC_KB_VOLUME_DOWN, TD(ALT_SHIFT), KC_DOWN,      KC_RALT, KC_RSFT, KC_RCMD,
-                                KC_TRNS, LT(3,KC_CAPS), KC_TRNS,      LT(3,KC_ENT), KC_TRNS, KC_TRNS
+                                KC_TRNS, LT(3,KC_CAPS),  KC_LALT,     LT(3,KC_ENT), KC_TRNS, KC_TRNS
 ),
 [3] = LAYOUT_symmetric(
   RESET,   DEBUG,   KC_ASUP, XXXXXXX,  XXXXXXX, XXXXXXX, XXXXXXX,
@@ -212,9 +220,94 @@ void alt_shift_reset(qk_tap_dance_state_t *state, void *user_data) {
     alt_shift_tap_state.state = TD_NONE;
 }
 
+static td_tap_t alt_back_tap_state = {.is_press_action = true, .state = TD_NONE};
+
+void alt_back_finished(qk_tap_dance_state_t *state, void *user_data) {
+    alt_back_tap_state.state = cur_dance(state);
+    switch (alt_back_tap_state.state) {
+        case SINGLE_TAP:
+            register_code(KC_GRV);
+            break;
+        case SINGLE_HOLD:
+            register_code(KC_RALT);
+            break;
+        case DOUBLE_TAP:
+            register_code(KC_LCMD);
+            register_code(KC_LBRC);
+            break;
+        case DOUBLE_HOLD:
+            register_code(KC_RALT);
+            break;
+    }
+}
+
+void alt_back_reset(qk_tap_dance_state_t *state, void *user_data) {
+    switch (alt_back_tap_state.state) {
+        case SINGLE_TAP:
+            unregister_code(KC_GRV);
+            break;
+        case SINGLE_HOLD:
+            unregister_code(KC_RALT);
+            break;
+        case DOUBLE_TAP:
+            unregister_code(KC_LBRC);
+            unregister_code(KC_LCMD);
+            break;
+        case DOUBLE_HOLD:
+            unregister_code(KC_RALT);
+            break;
+    }
+    alt_back_tap_state.state = TD_NONE;
+}
+
+static td_tap_t q_forw_tap_state = {.is_press_action = true, .state = TD_NONE};
+
+void q_forw_finished(qk_tap_dance_state_t *state, void *user_data) {
+    q_forw_tap_state.state = cur_dance(state);
+    switch (q_forw_tap_state.state) {
+        case SINGLE_TAP:
+            register_code(KC_Q);
+            break;
+        case SINGLE_HOLD:
+            register_code(KC_RSFT);
+            register_code(KC_Q);
+            break;
+        case DOUBLE_TAP:
+            register_code(KC_LCMD);
+            register_code(KC_RBRC);
+            break;
+        case DOUBLE_HOLD:
+            register_code(KC_Q);
+            register_code(KC_Q);
+            break;
+    }
+}
+
+void q_forw_reset(qk_tap_dance_state_t *state, void *user_data) {
+    switch (q_forw_tap_state.state) {
+        case SINGLE_TAP:
+            unregister_code(KC_Q);
+            break;
+        case SINGLE_HOLD:
+            unregister_code(KC_Q);
+            unregister_code(KC_RSFT);
+            break;
+        case DOUBLE_TAP:
+            unregister_code(KC_RBRC);
+            unregister_code(KC_LCMD);
+            break;
+        case DOUBLE_HOLD:
+            unregister_code(KC_Q);
+            unregister_code(KC_Q);
+            break;
+    }
+    q_forw_tap_state.state = TD_NONE;
+}
 
 qk_tap_dance_action_t tap_dance_actions[] = {
-    [CTL_SPACE] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, ctl_space_finished, ctl_space_reset),
-    [CMD_SHIFT] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, cmd_shift_finished, cmd_shift_reset),
-    [ALT_SHIFT] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, alt_shift_finished, alt_shift_reset)
-};
+  [CTL_SPACE] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, ctl_space_finished, ctl_space_reset), 
+  [CMD_SHIFT] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, cmd_shift_finished, cmd_shift_reset), 
+  [ALT_SHIFT] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, alt_shift_finished, alt_shift_reset), 
+  [ALT_BACK] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, alt_back_finished, alt_back_reset), 
+  [Q_FORW] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, q_forw_finished, q_forw_reset)
+  };
