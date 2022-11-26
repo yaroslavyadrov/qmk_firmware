@@ -20,7 +20,9 @@ enum {
     CMD_SHIFT,
     ALT_SHIFT,
     ALT_BACK,
-    Q_FORW
+    Q_FORW,
+    ENT_SPACE,
+    LAYER_SWITCH
 };
 
 int cur_dance(qk_tap_dance_state_t *state);
@@ -41,24 +43,30 @@ void alt_back_reset(qk_tap_dance_state_t *state, void *user_data);
 void q_forw_finished(qk_tap_dance_state_t *state, void *user_data);
 void q_forw_reset(qk_tap_dance_state_t *state, void *user_data);
 
+void ent_space_finished(qk_tap_dance_state_t *state, void *user_data);
+void ent_space_reset(qk_tap_dance_state_t *state, void *user_data);
+
+void layer_switch_finished(qk_tap_dance_state_t *state, void *user_data);
+void layer_switch_reset(qk_tap_dance_state_t *state, void *user_data);
+
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 [0] = LAYOUT(
-  KC_ESC, TD(ALT_BACK),   TD(Q_FORW),    KC_W,    KC_E,    KC_R,      KC_T,      KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,            KC_LBRC,         KC_RBRC,
-          LSFT_T(KC_TAB), KC_A,          KC_S,    KC_D,    KC_F,      KC_G,      KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN,         LAG_T(KC_QUOT),
-          TD(CTL_SPACE),  KC_Z,          KC_X,    KC_C,    KC_V,      KC_B,      KC_N,    KC_M,    KC_COMM, KC_DOT,  RALT_T(KC_SLSH), RGUI_T(KC_BSLS),
-                     LT(2,KC_CAPS), LT(1,KC_ENT), TD(CMD_SHIFT),      LT(1,KC_ESC), LT(2,KC_SPC),  RSFT_T(KC_BSPC)
+  KC_ESC, TD(ALT_BACK),   TD(Q_FORW),    KC_W,    KC_E,    KC_R,  KC_T,          KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,            KC_LBRC,         LAG_T(KC_RBRC),
+          LSFT_T(KC_TAB), KC_A,          KC_S,    KC_D,    KC_F,  KC_G,          KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN,         KC_QUOT,
+          TD(CTL_SPACE),  KC_Z,          KC_X,    KC_C,    KC_V,  KC_B,          KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, RGUI_T(KC_BSLS),
+                         TD(ENT_SPACE), TD(LAYER_SWITCH), TD(CMD_SHIFT),         RSFT_T(KC_ENT), LT(2,KC_SPC),  LT(1,KC_BSPC)
 ),
 [1] = LAYOUT(
   KC_TRNS, KC_CAPS, KC_PSLS, KC_7, KC_8, KC_9,  KC_MINS,        KC_AMPR,   KC_COLN,   KC_PMNS,   KC_GT,   KC_NO,   KC_NO,  RSG(KC_4),
            KC_TRNS, KC_PAST, KC_4, KC_5, KC_6,  KC_EQL,         KC_EXLM,   KC_PEQL,   KC_LPRN,   KC_RPRN, KC_QUES, KC_NO,
            KC_TRNS, KC_0,    KC_1, KC_2, KC_3,  KC_PDOT,        KC_PIPE,   KC_UNDS,   KC_LCBR,   KC_RCBR, KC_RALT,   KC_RCMD,
-                        LT(3,KC_CAPS), KC_TRNS, KC_TRNS,        KC_TRNS,   LT(3, KC_BSPC),   KC_TRNS
+                        LT(3,KC_ENT), KC_TRNS,  KC_TRNS,        KC_TRNS,   LT(3, KC_SPC),   KC_TRNS
 ),
 [2] = LAYOUT(
-  KC_TRNS, KC_CAPS,  KC_NO,   KC_F7,   KC_F8,   KC_F9,   KC_F10,      KC_KB_VOLUME_UP,   KC_ENT,        RALT(KC_ENT), KC_RGUI, KC_RSFT, KC_WH_D,  RSG(KC_4),
-           KC_TRNS,  KC_NO,   KC_F4,   KC_F5,   KC_F6,   KC_F11,      KC_HOME,           KC_LEFT,       KC_UP,        KC_RGHT, KC_END,  KC_WH_U,
-           KC_TRNS,  KC_LGUI, KC_F1,   KC_F2,   KC_F4,   KC_F12,      KC_KB_VOLUME_DOWN, TD(ALT_SHIFT), KC_DOWN,      KC_RALT, KC_RSFT, KC_RCMD,
-                                KC_TRNS, LT(3,KC_CAPS),  KC_LALT,     LT(3,KC_ENT), KC_TRNS, KC_TRNS
+  KC_TRNS, KC_CAPS,  KC_NO,   KC_F7,   KC_F8,   KC_F9,   KC_F10,        KC_KB_VOLUME_UP,   KC_ENT,        RALT(KC_ENT), KC_RGUI, KC_RSFT, KC_PGUP,  RSG(KC_4),
+           KC_TRNS,  KC_NO,   KC_F4,   KC_F5,   KC_F6,   KC_F11,        KC_HOME,           KC_LEFT,       KC_UP,        KC_RGHT, KC_END,  KC_PGDN,
+           KC_TRNS,  KC_LGUI, KC_F1,   KC_F2,   KC_F3,   KC_F12,        KC_KB_VOLUME_DOWN, KC_RALT,       KC_DOWN,      TD(ALT_SHIFT), KC_RSFT, KC_RCMD,
+                        KC_TRNS, LT(3,KC_CAPS), TD(CMD_SHIFT),        KC_TRNS, KC_TRNS,  LT(3,KC_BSPC)
 ),
 [3] = LAYOUT_symmetric(
   RESET,   DEBUG,   KC_ASUP, XXXXXXX,  XXXXXXX, XXXXXXX, XXXXXXX,
@@ -97,8 +105,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  */
 int cur_dance(qk_tap_dance_state_t *state) {
     if (state->count == 1) {
-        if (state->interrupted || !state->pressed) return SINGLE_TAP;
+        if (state->interrupted) return SINGLE_HOLD;
         // Key has not been interrupted, but the key is still held. Means you want to send a 'HOLD'.
+        else if (!state->pressed) return SINGLE_TAP;
         else
             return SINGLE_HOLD;
     } else if (state->count == 2) {
@@ -304,10 +313,90 @@ void q_forw_reset(qk_tap_dance_state_t *state, void *user_data) {
     q_forw_tap_state.state = TD_NONE;
 }
 
+static td_tap_t ent_space_tap_state = {.is_press_action = true, .state = TD_NONE};
+
+void ent_space_finished(qk_tap_dance_state_t *state, void *user_data) {
+    ent_space_tap_state.state = cur_dance(state);
+    switch (ent_space_tap_state.state) {
+        case SINGLE_TAP:
+            register_code(KC_ENT);
+            break;
+        case SINGLE_HOLD:
+            register_code(KC_RALT);
+            break;
+        case DOUBLE_TAP:
+            register_code(KC_SPC);
+            break;
+        case DOUBLE_HOLD:
+            register_code(KC_RALT);
+            register_code(KC_RSFT);
+            break;
+    }
+}
+
+void ent_space_reset(qk_tap_dance_state_t *state, void *user_data) {
+    switch (ent_space_tap_state.state) {
+        case SINGLE_TAP:
+            unregister_code(KC_ENT);
+            break;
+        case SINGLE_HOLD:
+            unregister_code(KC_RALT);
+            break;
+        case DOUBLE_TAP:
+            unregister_code(KC_SPC);
+            break;
+        case DOUBLE_HOLD:
+            unregister_code(KC_RALT);
+            unregister_code(KC_RSFT);
+            break;
+    }
+    ent_space_tap_state.state = TD_NONE;
+}
+
+static td_tap_t layer_switch_tap_state = {.is_press_action = true, .state = TD_NONE};
+
+void layer_switch_finished(qk_tap_dance_state_t *state, void *user_data) {
+    layer_switch_tap_state.state = cur_dance(state);
+    switch (layer_switch_tap_state.state) {
+        case SINGLE_TAP:
+            register_code(KC_CAPS);
+            break;
+        case SINGLE_HOLD:
+            layer_on(1);
+            break;
+        case DOUBLE_TAP:
+            register_code(KC_CAPS);
+            break;
+        case DOUBLE_HOLD:
+            layer_on(2);
+            break;
+    }
+}
+
+void layer_switch_reset(qk_tap_dance_state_t *state, void *user_data) {
+    switch (layer_switch_tap_state.state) {
+        case SINGLE_TAP:
+            unregister_code(KC_CAPS);
+            break;
+        case SINGLE_HOLD:
+            layer_off(1);
+            break;
+        case DOUBLE_TAP:
+            unregister_code(KC_CAPS);
+            break;
+        case DOUBLE_HOLD:
+            layer_off(2);
+            break;
+    }
+    layer_switch_tap_state.state = TD_NONE;
+}
+
 qk_tap_dance_action_t tap_dance_actions[] = {
-  [CTL_SPACE] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, ctl_space_finished, ctl_space_reset), 
-  [CMD_SHIFT] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, cmd_shift_finished, cmd_shift_reset), 
-  [ALT_SHIFT] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, alt_shift_finished, alt_shift_reset), 
-  [ALT_BACK] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, alt_back_finished, alt_back_reset), 
-  [Q_FORW] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, q_forw_finished, q_forw_reset)
+  [CTL_SPACE] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, ctl_space_finished, ctl_space_reset),
+  [CMD_SHIFT] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, cmd_shift_finished, cmd_shift_reset),
+  [ALT_SHIFT] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, alt_shift_finished, alt_shift_reset),
+  [ALT_BACK] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, alt_back_finished, alt_back_reset),
+  [Q_FORW] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, q_forw_finished, q_forw_reset),
+  [ENT_SPACE] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, ent_space_finished, ent_space_reset),
+  [LAYER_SWITCH] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, layer_switch_finished, layer_switch_reset)
   };
