@@ -20,5 +20,5 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #define IGNORE_MOD_TAP_INTERRUPT
-#define AUTO_SHIFT_TIMEOUT 175
-#define TAPPING_TERM 190
+#define AUTO_SHIFT_TIMEOUT 165
+#define TAPPING_TERM 185
