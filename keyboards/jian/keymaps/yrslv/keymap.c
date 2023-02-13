@@ -1,4 +1,5 @@
 #include QMK_KEYBOARD_H
+#include "print.h"
 
 enum {
     TD_NONE = 0,
@@ -54,7 +55,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   KC_ESC, TD(ALT_BACK),   TD(Q_FORW),    KC_W,    KC_E,    KC_R,  KC_T,          KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,            KC_LBRC,         LAG_T(KC_RBRC),
           LSFT_T(KC_TAB), KC_A,          KC_S,    KC_D,    KC_F,  KC_G,          KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN,         KC_QUOT,
           TD(CTL_SPACE),  KC_Z,          KC_X,    KC_C,    KC_V,  KC_B,          KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, RGUI_T(KC_BSLS),
-                         TD(ENT_SPACE), TD(LAYER_SWITCH), TD(CMD_SHIFT),         RSFT_T(KC_ENT), LT(2,KC_SPC),  LT(1,KC_BSPC)
+                         TD(ENT_SPACE), LT(1,KC_CAPS), TD(CMD_SHIFT),         RSFT_T(KC_ENT), LT(2,KC_SPC),  LT(1,KC_BSPC)
 ),
 [1] = LAYOUT(
   KC_TRNS, KC_CAPS, KC_PSLS, KC_7, KC_8, KC_9,  KC_MINS,        KC_AMPR,   KC_COLN,   KC_PMNS,   KC_GT,   KC_NO,   KC_NO,  RSG(KC_4),
@@ -65,7 +66,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 [2] = LAYOUT(
   KC_TRNS, KC_CAPS,  KC_NO,   KC_F7,   KC_F8,   KC_F9,   KC_F10,        KC_KB_VOLUME_UP,   KC_ENT,        RALT(KC_ENT), KC_RGUI, KC_RSFT, KC_PGUP,  RSG(KC_4),
            KC_TRNS,  KC_NO,   KC_F4,   KC_F5,   KC_F6,   KC_F11,        KC_HOME,           KC_LEFT,       KC_UP,        KC_RGHT, KC_END,  KC_PGDN,
-           KC_TRNS,  KC_LGUI, KC_F1,   KC_F2,   KC_F3,   KC_F12,        KC_KB_VOLUME_DOWN, KC_RALT,       KC_DOWN,      TD(ALT_SHIFT), KC_RSFT, KC_RCMD,
+           KC_LCMD,  KC_LGUI, KC_F1,   KC_F2,   KC_F3,   KC_F12,        KC_KB_VOLUME_DOWN, KC_RALT,       KC_DOWN,      TD(ALT_SHIFT), KC_RSFT, KC_RCMD,
                         KC_TRNS, LT(3,KC_CAPS), TD(CMD_SHIFT),        KC_TRNS, KC_TRNS,  LT(3,KC_BSPC)
 ),
 [3] = LAYOUT_symmetric(
@@ -75,6 +76,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                        _______, XXXXXXX, _______
 )
 };
+
+void keyboard_post_init_user(void) {
+  // Customise these values to desired behaviour
+  debug_enable=false;
+  debug_matrix=false;
+  //debug_keyboard=true;
+  //debug_mouse=true;
+}
 
 /* Return an integer that corresponds to what kind of tap dance should be executed.
  *
@@ -105,11 +114,23 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  */
 int cur_dance(qk_tap_dance_state_t *state) {
     if (state->count == 1) {
-        if (state->interrupted) return SINGLE_HOLD;
-        // Key has not been interrupted, but the key is still held. Means you want to send a 'HOLD'.
-        else if (!state->pressed) return SINGLE_TAP;
-        else
+        // If count = 1, and it has been interrupted - it doesn't matter if it is pressed or not: Send SINGLE_TAP
+        if (state->interrupted) {
+            // dprint("interrupted SINGLE_HOLD");
             return SINGLE_HOLD;
+            // If the interrupting key is released before the tap-dance key, then it is a single HOLD
+            // However, if the tap-dance key is released first, then it is a single TAP
+            // But how to get access to the state of the interrupting key????
+        } else {
+            if (!state->pressed) {
+                // dprint("!pressed SINGLE_TAP");
+                return SINGLE_TAP;
+            }
+            else {
+                // dprint("pressed SINGLE_HOLD");
+                return SINGLE_HOLD;
+            }
+        }
     } else if (state->count == 2) {
         if (state->pressed)
             return DOUBLE_HOLD;
@@ -238,7 +259,8 @@ void alt_back_finished(qk_tap_dance_state_t *state, void *user_data) {
             register_code(KC_GRV);
             break;
         case SINGLE_HOLD:
-            register_code(KC_RALT);
+            register_code(KC_RSFT);
+            register_code(KC_GRV);
             break;
         case DOUBLE_TAP:
             register_code(KC_LCMD);
@@ -256,7 +278,8 @@ void alt_back_reset(qk_tap_dance_state_t *state, void *user_data) {
             unregister_code(KC_GRV);
             break;
         case SINGLE_HOLD:
-            unregister_code(KC_RALT);
+            unregister_code(KC_RSFT);
+            unregister_code(KC_GRV);
             break;
         case DOUBLE_TAP:
             unregister_code(KC_LBRC);
@@ -319,17 +342,16 @@ void ent_space_finished(qk_tap_dance_state_t *state, void *user_data) {
     ent_space_tap_state.state = cur_dance(state);
     switch (ent_space_tap_state.state) {
         case SINGLE_TAP:
-            register_code(KC_ENT);
+            register_code(KC_TAB);
             break;
         case SINGLE_HOLD:
             register_code(KC_RALT);
             break;
         case DOUBLE_TAP:
-            register_code(KC_SPC);
+            register_code(KC_ENT);
             break;
         case DOUBLE_HOLD:
-            register_code(KC_RALT);
-            register_code(KC_RSFT);
+            layer_on(2);
             break;
     }
 }
@@ -337,17 +359,16 @@ void ent_space_finished(qk_tap_dance_state_t *state, void *user_data) {
 void ent_space_reset(qk_tap_dance_state_t *state, void *user_data) {
     switch (ent_space_tap_state.state) {
         case SINGLE_TAP:
-            unregister_code(KC_ENT);
+            unregister_code(KC_TAB);
             break;
         case SINGLE_HOLD:
             unregister_code(KC_RALT);
             break;
         case DOUBLE_TAP:
-            unregister_code(KC_SPC);
+            unregister_code(KC_ENT);
             break;
         case DOUBLE_HOLD:
-            unregister_code(KC_RALT);
-            unregister_code(KC_RSFT);
+            layer_off(2);
             break;
     }
     ent_space_tap_state.state = TD_NONE;
@@ -360,15 +381,19 @@ void layer_switch_finished(qk_tap_dance_state_t *state, void *user_data) {
     switch (layer_switch_tap_state.state) {
         case SINGLE_TAP:
             register_code(KC_CAPS);
+            // dprint("register_code(KC_CAPS)");
             break;
         case SINGLE_HOLD:
             layer_on(1);
+            // dprint("layer_on(1)");
             break;
         case DOUBLE_TAP:
             register_code(KC_CAPS);
+            // dprint("register_code(KC_CAPS)");
             break;
         case DOUBLE_HOLD:
             layer_on(2);
+            // dprint("layer_on(2)");
             break;
     }
 }
@@ -377,19 +402,37 @@ void layer_switch_reset(qk_tap_dance_state_t *state, void *user_data) {
     switch (layer_switch_tap_state.state) {
         case SINGLE_TAP:
             unregister_code(KC_CAPS);
+            // dprint("unregister_code(KC_CAPS)");
             break;
         case SINGLE_HOLD:
             layer_off(1);
+            // dprint("layer_off(1)");
             break;
         case DOUBLE_TAP:
             unregister_code(KC_CAPS);
+            // dprint("unregister_code(KC_CAPS)");
             break;
         case DOUBLE_HOLD:
             layer_off(2);
+            // dprint("layer_off(2)");
             break;
     }
     layer_switch_tap_state.state = TD_NONE;
 }
+
+// bool get_permissive_hold(uint16_t keycode, keyrecord_t *record) {
+//     dprintf("get_permissive_hold %s", keycode);
+//     switch (keycode) {
+//         case TD(LAYER_SWITCH):
+            // dprint("pepm hold true");
+//             // Immediately select the hold action when another key is tapped.
+//             return true;
+//         default:
+//             // Do not select the hold action when another key is tapped.
+            // dprint("pepm hold false");
+//             return false;
+//     }
+// }
 
 qk_tap_dance_action_t tap_dance_actions[] = {
   [CTL_SPACE] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, ctl_space_finished, ctl_space_reset),

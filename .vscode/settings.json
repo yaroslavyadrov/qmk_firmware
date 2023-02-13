@@ -21,7 +21,10 @@
         "ranges": "c",
         "chrono": "c",
         "unordered_map": "c",
-        "bitset": "c"
+        "bitset": "c",
+        "map": "c",
+        "set": "c",
+        "unordered_set": "c"
     },
     "[markdown]": {
         "editor.trimAutoWhitespace": false,
