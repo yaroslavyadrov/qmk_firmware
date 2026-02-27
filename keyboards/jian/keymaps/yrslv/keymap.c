@@ -26,29 +26,29 @@ enum {
     LAYER_SWITCH
 };
 
-int cur_dance(qk_tap_dance_state_t *state);
+int cur_dance(tap_dance_state_t *state);
 
 // For the x tap dance. Put it here so it can be used in any keymap
-void ctl_space_finished(qk_tap_dance_state_t *state, void *user_data);
-void ctl_space_reset(qk_tap_dance_state_t *state, void *user_data);
+void ctl_space_finished(tap_dance_state_t *state, void *user_data);
+void ctl_space_reset(tap_dance_state_t *state, void *user_data);
 
-void cmd_shift_finished(qk_tap_dance_state_t *state, void *user_data);
-void cmd_shift_reset(qk_tap_dance_state_t *state, void *user_data);
+void cmd_shift_finished(tap_dance_state_t *state, void *user_data);
+void cmd_shift_reset(tap_dance_state_t *state, void *user_data);
 
-void alt_shift_finished(qk_tap_dance_state_t *state, void *user_data);
-void alt_shift_reset(qk_tap_dance_state_t *state, void *user_data);
+void alt_shift_finished(tap_dance_state_t *state, void *user_data);
+void alt_shift_reset(tap_dance_state_t *state, void *user_data);
 
-void alt_back_finished(qk_tap_dance_state_t *state, void *user_data);
-void alt_back_reset(qk_tap_dance_state_t *state, void *user_data);
+void alt_back_finished(tap_dance_state_t *state, void *user_data);
+void alt_back_reset(tap_dance_state_t *state, void *user_data);
 
-void q_forw_finished(qk_tap_dance_state_t *state, void *user_data);
-void q_forw_reset(qk_tap_dance_state_t *state, void *user_data);
+void q_forw_finished(tap_dance_state_t *state, void *user_data);
+void q_forw_reset(tap_dance_state_t *state, void *user_data);
 
-void ent_space_finished(qk_tap_dance_state_t *state, void *user_data);
-void ent_space_reset(qk_tap_dance_state_t *state, void *user_data);
+void ent_space_finished(tap_dance_state_t *state, void *user_data);
+void ent_space_reset(tap_dance_state_t *state, void *user_data);
 
-void layer_switch_finished(qk_tap_dance_state_t *state, void *user_data);
-void layer_switch_reset(qk_tap_dance_state_t *state, void *user_data);
+void layer_switch_finished(tap_dance_state_t *state, void *user_data);
+void layer_switch_reset(tap_dance_state_t *state, void *user_data);
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 [0] = LAYOUT(
@@ -69,11 +69,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
            KC_LCMD,  KC_LGUI, KC_F1,   KC_F2,   KC_F3,   KC_F12,        KC_KB_VOLUME_DOWN, KC_RALT,       KC_DOWN,      TD(ALT_SHIFT), KC_RSFT, KC_RCTL,
                         KC_TRNS, LT(3,KC_CAPS), TD(CMD_SHIFT),        KC_TRNS, KC_TRNS,  LT(3,KC_BSPC)
 ),
-[3] = LAYOUT_symmetric(
-  RESET,   DEBUG,   XXXXXXX, XXXXXXX,  XXXXXXX, XXXXXXX, XXXXXXX,
-           XXXXXXX, XXXXXXX, XXXXXXX,  XXXXXXX, XXXXXXX, XXXXXXX,
-           EEP_RST, XXXXXXX, XXXXXXX,  XXXXXXX, XXXXXXX, XXXXXXX,
-                                       _______, XXXXXXX, _______
+[3] = LAYOUT(
+  QK_BOOT, DB_TOGG, XXXXXXX, XXXXXXX,  XXXXXXX, XXXXXXX, XXXXXXX,        XXXXXXX, XXXXXXX, XXXXXXX,  XXXXXXX, XXXXXXX, DB_TOGG, QK_BOOT,
+                    XXXXXXX, XXXXXXX, XXXXXXX,  XXXXXXX, XXXXXXX, XXXXXXX,        XXXXXXX, XXXXXXX, XXXXXXX,  XXXXXXX, XXXXXXX, XXXXXXX,
+                    QK_CLEAR_EEPROM, XXXXXXX, XXXXXXX,  XXXXXXX, XXXXXXX, XXXXXXX,        XXXXXXX, XXXXXXX, XXXXXXX,  XXXXXXX, XXXXXXX, QK_CLEAR_EEPROM,
+                                                _______, XXXXXXX, _______,        _______, XXXXXXX, _______
 )
 };
 
@@ -112,7 +112,7 @@ void keyboard_post_init_user(void) {
  * For the third point, there does exist the 'TD_DOUBLE_SINGLE_TAP', however this is not fully tested
  *
  */
-int cur_dance(qk_tap_dance_state_t *state) {
+int cur_dance(tap_dance_state_t *state) {
     if (state->count == 1) {
         // If count = 1, and it has been interrupted - it doesn't matter if it is pressed or not: Send SINGLE_TAP
         if (state->interrupted) {
@@ -143,7 +143,7 @@ int cur_dance(qk_tap_dance_state_t *state) {
 // Create an instance of 'td_tap_t' for the 'x' tap dance.
 static td_tap_t ctl_space_tap_state = {.is_press_action = true, .state = TD_NONE};
 
-void ctl_space_finished(qk_tap_dance_state_t *state, void *user_data) {
+void ctl_space_finished(tap_dance_state_t *state, void *user_data) {
     ctl_space_tap_state.state = cur_dance(state);
     switch (ctl_space_tap_state.state) {
         case SINGLE_TAP:
@@ -159,7 +159,7 @@ void ctl_space_finished(qk_tap_dance_state_t *state, void *user_data) {
     }
 }
 
-void ctl_space_reset(qk_tap_dance_state_t *state, void *user_data) {
+void ctl_space_reset(tap_dance_state_t *state, void *user_data) {
     switch (ctl_space_tap_state.state) {
         case SINGLE_TAP:
             unregister_code(KC_LCTL);
@@ -177,7 +177,7 @@ void ctl_space_reset(qk_tap_dance_state_t *state, void *user_data) {
 
 static td_tap_t cmd_shift_tap_state = {.is_press_action = true, .state = TD_NONE};
 
-void cmd_shift_finished(qk_tap_dance_state_t *state, void *user_data) {
+void cmd_shift_finished(tap_dance_state_t *state, void *user_data) {
     cmd_shift_tap_state.state = cur_dance(state);
     switch (cmd_shift_tap_state.state) {
         case SINGLE_TAP:
@@ -197,7 +197,7 @@ void cmd_shift_finished(qk_tap_dance_state_t *state, void *user_data) {
     }
 }
 
-void cmd_shift_reset(qk_tap_dance_state_t *state, void *user_data) {
+void cmd_shift_reset(tap_dance_state_t *state, void *user_data) {
     switch (cmd_shift_tap_state.state) {
         case SINGLE_TAP:
             unregister_code(KC_RCMD);
@@ -218,7 +218,7 @@ void cmd_shift_reset(qk_tap_dance_state_t *state, void *user_data) {
 
 static td_tap_t alt_shift_tap_state = {.is_press_action = true, .state = TD_NONE};
 
-void alt_shift_finished(qk_tap_dance_state_t *state, void *user_data) {
+void alt_shift_finished(tap_dance_state_t *state, void *user_data) {
     alt_shift_tap_state.state = cur_dance(state);
     switch (alt_shift_tap_state.state) {
         case SINGLE_TAP:
@@ -234,7 +234,7 @@ void alt_shift_finished(qk_tap_dance_state_t *state, void *user_data) {
     }
 }
 
-void alt_shift_reset(qk_tap_dance_state_t *state, void *user_data) {
+void alt_shift_reset(tap_dance_state_t *state, void *user_data) {
     switch (alt_shift_tap_state.state) {
         case SINGLE_TAP:
             unregister_code(KC_RALT);
@@ -252,7 +252,7 @@ void alt_shift_reset(qk_tap_dance_state_t *state, void *user_data) {
 
 static td_tap_t alt_back_tap_state = {.is_press_action = true, .state = TD_NONE};
 
-void alt_back_finished(qk_tap_dance_state_t *state, void *user_data) {
+void alt_back_finished(tap_dance_state_t *state, void *user_data) {
     alt_back_tap_state.state = cur_dance(state);
     switch (alt_back_tap_state.state) {
         case SINGLE_TAP:
@@ -272,7 +272,7 @@ void alt_back_finished(qk_tap_dance_state_t *state, void *user_data) {
     }
 }
 
-void alt_back_reset(qk_tap_dance_state_t *state, void *user_data) {
+void alt_back_reset(tap_dance_state_t *state, void *user_data) {
     switch (alt_back_tap_state.state) {
         case SINGLE_TAP:
             unregister_code(KC_GRV);
@@ -294,7 +294,7 @@ void alt_back_reset(qk_tap_dance_state_t *state, void *user_data) {
 
 static td_tap_t q_forw_tap_state = {.is_press_action = true, .state = TD_NONE};
 
-void q_forw_finished(qk_tap_dance_state_t *state, void *user_data) {
+void q_forw_finished(tap_dance_state_t *state, void *user_data) {
     q_forw_tap_state.state = cur_dance(state);
     switch (q_forw_tap_state.state) {
         case SINGLE_TAP:
@@ -315,7 +315,7 @@ void q_forw_finished(qk_tap_dance_state_t *state, void *user_data) {
     }
 }
 
-void q_forw_reset(qk_tap_dance_state_t *state, void *user_data) {
+void q_forw_reset(tap_dance_state_t *state, void *user_data) {
     switch (q_forw_tap_state.state) {
         case SINGLE_TAP:
             unregister_code(KC_Q);
@@ -338,7 +338,7 @@ void q_forw_reset(qk_tap_dance_state_t *state, void *user_data) {
 
 static td_tap_t ent_space_tap_state = {.is_press_action = true, .state = TD_NONE};
 
-void ent_space_finished(qk_tap_dance_state_t *state, void *user_data) {
+void ent_space_finished(tap_dance_state_t *state, void *user_data) {
     ent_space_tap_state.state = cur_dance(state);
     switch (ent_space_tap_state.state) {
         case SINGLE_TAP:
@@ -356,7 +356,7 @@ void ent_space_finished(qk_tap_dance_state_t *state, void *user_data) {
     }
 }
 
-void ent_space_reset(qk_tap_dance_state_t *state, void *user_data) {
+void ent_space_reset(tap_dance_state_t *state, void *user_data) {
     switch (ent_space_tap_state.state) {
         case SINGLE_TAP:
             unregister_code(KC_TAB);
@@ -376,7 +376,7 @@ void ent_space_reset(qk_tap_dance_state_t *state, void *user_data) {
 
 static td_tap_t layer_switch_tap_state = {.is_press_action = true, .state = TD_NONE};
 
-void layer_switch_finished(qk_tap_dance_state_t *state, void *user_data) {
+void layer_switch_finished(tap_dance_state_t *state, void *user_data) {
     layer_switch_tap_state.state = cur_dance(state);
     switch (layer_switch_tap_state.state) {
         case SINGLE_TAP:
@@ -398,7 +398,7 @@ void layer_switch_finished(qk_tap_dance_state_t *state, void *user_data) {
     }
 }
 
-void layer_switch_reset(qk_tap_dance_state_t *state, void *user_data) {
+void layer_switch_reset(tap_dance_state_t *state, void *user_data) {
     switch (layer_switch_tap_state.state) {
         case SINGLE_TAP:
             unregister_code(KC_CAPS);
@@ -434,7 +434,7 @@ void layer_switch_reset(qk_tap_dance_state_t *state, void *user_data) {
 //     }
 // }
 
-qk_tap_dance_action_t tap_dance_actions[] = {
+tap_dance_action_t tap_dance_actions[] = {
   [CTL_SPACE] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, ctl_space_finished, ctl_space_reset),
   [CMD_SHIFT] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, cmd_shift_finished, cmd_shift_reset),
   [ALT_SHIFT] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, alt_shift_finished, alt_shift_reset),
